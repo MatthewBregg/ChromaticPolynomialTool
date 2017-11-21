@@ -93,7 +93,7 @@ public class GraphCreationFrame extends JFrame {
     private static final int nodeRadius = 30;
     private final ArrayList<Node> nodes = new ArrayList<>();
     private void createNewNodeAtPoint(Point point) {
-        nodes.add(new Node(point));
+        nodes.add(new Node(point,nodes.size()));
         redrawImage();
     }
 
@@ -105,7 +105,7 @@ public class GraphCreationFrame extends JFrame {
         this.repaint();
         ChromaticPolynomial chromaticPolynomial = new ChromaticPolynomial();
         System.out.println("Testing out poly");
-        System.out.println(chromaticPolynomial.calculateChromaticPolynomial(new HashSet<>(nodes)));
+        System.out.println(chromaticPolynomial.calculateChromaticPolynomial(nodes));
 
     }
 

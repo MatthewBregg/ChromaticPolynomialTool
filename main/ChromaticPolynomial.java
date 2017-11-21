@@ -1,5 +1,6 @@
 package main;
 
+import java.awt.*;
 import java.util.*;
 
 public class ChromaticPolynomial {
@@ -10,192 +11,150 @@ public class ChromaticPolynomial {
         }
 
         int id;
-        Set<Integer> edgesTo = new HashSet<>();
-    }
-
-    private int ComponentsInGraph(Set<PolyNode> graph) {
-        Map<Integer,PolyNode> graphMap = new HashMap<>();
-        for ( PolyNode node : graph ) {
-            graphMap.put(node.id,node);
-        }
-
-        Map<PolyNode,Boolean> visited = new HashMap<>();
-        for ( PolyNode node : graph ) {
-            visited.put(node,false);
-        }
-        int components = 0;
-        for (PolyNode node : graph ) {
-            if ( !visited.get(node) ) {
-                ++components;
-                recurseAll(node, graphMap, visited);
-            }
-        }
-        return components;
-    }
-
-    private void recurseAll(PolyNode node, Map<Integer, PolyNode> graphMap, Map<PolyNode, Boolean> visited) {
-       if ( visited.get(node) ) {
-           return;
-       }
-       visited.put(node,true);
-       for ( Integer adjacentNode : node.edgesTo) {
-           recurseAll(graphMap.get(adjacentNode),graphMap,visited);
-       }
-    }
-
-    // Returns new node UV, mutates graph so that node u and V are contracted.
-    private PolyNode ContractGraph(Set<PolyNode> graph, PolyNode u, PolyNode v) {
-       // We will reuse node U and node UV.
-        // Remove any edge u had to v.
-        for ( Integer nodeID : u.edgesTo ) {
-            if (nodeID.equals(v.id)) {
-                u.edgesTo.remove(nodeID);
-                break;
-            }
-        }
-
-        for ( PolyNode node : graph ) {
-            for ( Integer nodeID : node.edgesTo ) {
-                if (nodeID.equals(v.id)) {
-                    node.edgesTo.remove(nodeID);
-                    node.edgesTo.add(u.id);
-                    u.edgesTo.add(node.id);
-                    break;
-                }
-            }
-        }
-
-        for ( PolyNode node : graph ) {
-            if ( node.id == v.id ) {
-                graph.remove(node);
-                break;
-            }
-        }
-
-        return u;
+        ArrayList<Integer> edgesTo = new ArrayList<>();
     }
 
 
-    // Simple enough, remove u from all edges, and then remove u from the set.
-    private void removeFromGraph(Set<PolyNode> graph, PolyNode u) {
-        for ( PolyNode node : graph ) {
-            for ( Integer nodeID : node.edgesTo ) {
-                if (nodeID.equals(u.id)) {
-                    node.edgesTo.remove(nodeID);
-                    break;
-                }
+    public String calculateChromaticPolynomial(ArrayList<Node> graph) {
+        boolean[][] newGraph = new boolean[graph.size()][graph.size()];
+        for (int i = 0; i != graph.size(); ++i ) {
+            for ( Node node : graph.get(i).edgesTo ) {
+                newGraph[i][node.id] = true;
+                newGraph[node.id][i] = true;
             }
-        }
-        graph.remove(u);
-    }
-
-
-    public String calculateChromaticPolynomial(Set<Node> graph) {
-        Set<PolyNode> newGraph = new HashSet<>();
-        for (Node n : graph ) {
-            PolyNode newNode = new PolyNode(n.hashCode());
-            for ( Node adjacent : n.edgesTo ) {
-                newNode.edgesTo.add(adjacent.hashCode());
-            }
-            newGraph.add(newNode);
         }
         return calculateChromaticPolynomialHelper(newGraph);
     }
 
-    private boolean doesGraphHaveEdges(Set<PolyNode> graph) {
-        for (PolyNode node : graph ) {
-            if ( node.edgesTo.size() > 0 ) {
-                return true;
+    private boolean doesGraphHaveEdges(boolean[][] graph) {
+        for (int i = 0; i != graph.length; ++i ) {
+            for (int j = 0; j != graph.length; ++j) {
+                if (graph[i][j]) {
+                    return true;
+                }
             }
         }
         return false;
     }
 
-    private Set<PolyNode> deepCopy(Set<PolyNode> graph) {
-        Set<PolyNode> copy = new HashSet<>();
-        for ( PolyNode node : graph ) {
-            PolyNode newNode = new PolyNode(node.id);
-            newNode.edgesTo = new HashSet<>(node.edgesTo);
-            copy.add(newNode);
-        }
-        return copy;
-    }
-
-    private void removeEdge(Set<PolyNode> graph, int nodeIDA, int nodeIDB) {
-       for (PolyNode node : graph) {
-           if ( node.id == nodeIDA ) {
-               for ( Integer nodeID : node.edgesTo) {
-                    if ( nodeID.equals(nodeIDB) ) {
-                        node.edgesTo.remove(nodeID);
-                        break;
-                    }
-               }
-           }
-       }
-        for (PolyNode node : graph) {
-            if ( node.id == nodeIDB ) {
-                for ( Integer nodeID : node.edgesTo) {
-                    if ( nodeID.equals(nodeIDA) ) {
-                        node.edgesTo.remove(nodeID);
-                        break;
-                    }
-                }
+    private boolean[][] deepCopy(boolean[][] graph) {
+        boolean[][] newGraph = new boolean[graph.length][graph.length];
+        for (int i = 0; i != graph.length; ++i ) {
+            for (int j = 0; j != graph.length; ++j ) {
+                newGraph[i][j] = graph[i][j];
             }
         }
+        return newGraph;
     }
 
-    private String calculateChromaticPolynomialHelper(Set<PolyNode> graph) {
+    private String calculateChromaticPolynomialHelper(boolean[][] graph) {
         if ( !doesGraphHaveEdges(graph) ) {
-            return "(x^"+graph.size() + ")";
+            return "(x^"+graph.length + ")";
         }
 
-        PolyNode a = null;
-        PolyNode b = null;
+        String deletion = "";
+        {
+            // Remove an edge from the graph
+            boolean[][] graphCopy = deepCopy(graph);
+            removeRandomEdgeFromGraph(graphCopy);
+            deletion = calculateChromaticPolynomialHelper(graphCopy);
+        }
+        String contraction = "";
+        {
+            boolean[][] graphCopy = deepCopy(graph);
+            graphCopy = contractRandomEdge(graphCopy);
+            contraction = calculateChromaticPolynomialHelper(graphCopy);
+        }
+        return "("+deletion + ")-(" + contraction+")";
+    }
 
-        for ( PolyNode node : graph ) {
-            if ( node.edgesTo.size() > 0 ) {
-                a = node;
-                int otherId = node.edgesTo.iterator().next();
-                for ( PolyNode node2 : graph ) {
-                    if ( node2.id == otherId ) {
-                        b = node2;
-                        break;
+
+    private boolean[][] contractRandomEdge(boolean[][] graph) {
+        int edgeBegin = -1;
+        int edgeEnd = -1;
+        for (int i = 0; i != graph.length; ++i ) {
+            for (int j = 0; j != graph.length; ++j) {
+                if ( graph[i][j] ) {
+                    if ( !graph[j][i] ) {
+                        throw new IllegalStateException("Error, graph is directional?");
+                    }
+                    edgeBegin = i;
+                    edgeEnd = j;
+                    if ( i == j ) {
+                        throw new IllegalStateException("Error, Cycle to self!!");
                     }
                 }
-                break;
             }
         }
 
-        Set<PolyNode> contracted = deepCopy(graph);
-        Set<PolyNode> deleted = deepCopy(graph);
-        System.out.println(contracted.size());
-        if ( a == null || b == null ) {
-            System.out.println("A is " + a + " B is " + b);
+        ArrayList<Node> newGraph = new ArrayList<>();
+        for ( int i = 0; i != graph.length; ++i ) {
+            // Ignore point for now, we don't use it.
+            newGraph.add(new Node(new Point(0,0),i));
         }
-        removeEdge(deleted,a.id,b.id);
-        ContractGraph(contracted,a,b);
-        String contractedPoly = calculateChromaticPolynomialHelper(contracted);
-        String deletedPoly = calculateChromaticPolynomialHelper(deleted);
 
-        return deletedPoly + "+" + contractedPoly;
+        for (int i = 0; i != graph.length; ++i ) {
+            for (int j = 0; j != graph.length; ++j) {
+                if ( graph[i][j]) {
+                    newGraph.get(i).edgesTo.add(newGraph.get(j));
+                    newGraph.get(j).edgesTo.add(newGraph.get(i));
+                }
+            }
+        }
 
+        Node newNode = new Node(new Point(0,0),-1);
+        newGraph.add(newNode);
+
+        for ( Node node : newGraph.get(edgeBegin).edgesTo ) {
+            newNode.edgesTo.add(node);
+            node.edgesTo.add(newNode);
+
+        }
+        for ( Node node : newGraph.get(edgeEnd).edgesTo ) {
+            newNode.edgesTo.add(node);
+            node.edgesTo.add(newNode);
+        }
+        newNode.edgesTo.remove(newNode);
+        for ( Node node : newGraph ) {
+            node.edgesTo.remove(newGraph.get(edgeBegin));
+            node.edgesTo.remove(newGraph.get(edgeEnd));
+        }
+
+        Node edgBeginNode = newGraph.get(edgeBegin);
+        Node edgeEndNode= newGraph.get(edgeEnd);
+        newGraph.remove(edgBeginNode);
+        newGraph.remove(edgeEndNode);
+
+        for ( int i = 0; i != newGraph.size(); ++i ) {
+            newGraph.get(i).setID(i);
+        }
+
+
+        boolean[][] newNewGraph = new boolean[newGraph.size()][newGraph.size()];
+        for (int i = 0; i != newGraph.size(); ++i ) {
+            for ( Node node : newGraph.get(i).edgesTo ) {
+                newNewGraph[i][node.id] = true;
+                newNewGraph[node.id][i] = true;
+            }
+        }
+        return newNewGraph;
     }
 
-    private boolean isCutEdge(int edgeBegin, int edgeEnd, Set<PolyNode> graph, Map<Integer, PolyNode> graphMap) {
-        Set<PolyNode> newGraph = deepCopy(graph);
-        for ( PolyNode n : newGraph ) {
-            if ( n.id == edgeBegin ) {
-                n.edgesTo.remove(edgeEnd);
-            }
-        }
-        for ( PolyNode n : newGraph ) {
-            if ( n.id == edgeEnd ) {
-                n.edgesTo.remove(edgeBegin);
-            }
-        }
 
-        return ( ComponentsInGraph(newGraph) > ComponentsInGraph(graph) );
+    private void removeRandomEdgeFromGraph(boolean[][] graph) {
+        for (int i = 0; i != graph.length; ++i ) {
+            for (int j = 0; j != graph.length; ++j) {
+                if ( graph[i][j] ) {
+                    if ( !graph[j][i] ) {
+                        throw new IllegalStateException("Error, graph is directional?");
+                    }
+                    graph[i][j] = false;
+                    graph[j][i] = false;
+                    return;
+                }
+            }
+        }
+        throw new IllegalStateException("Error, no edges to contract!");
     }
-
 
 }
