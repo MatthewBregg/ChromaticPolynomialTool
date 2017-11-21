@@ -2,6 +2,8 @@ package main;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -74,12 +76,31 @@ public class GraphCreationFrame extends JFrame {
         this.setTitle("Fun with Graphs");
         this.setSize(width, height);
 
-        visualGraph = new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
+        this.setLayout(new BorderLayout());
+
+        visualGraph = new BufferedImage(width,height-100,BufferedImage.TYPE_INT_ARGB);
         setBufferedImageToColor(backgroundColor);
         JLabel visualizedGraphLabel = new JLabel(new ImageIcon(visualGraph));
         visualizedGraphLabel.addMouseListener(new GraphMouseyCreatey());
 
-        this.add(visualizedGraphLabel);
+        this.add(visualizedGraphLabel,BorderLayout.NORTH);
+        JButton calcChromaticPoly = new JButton("Calculate The Chromatic Polynomial");
+        calcChromaticPoly.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                ChromaticPolynomial chromaticPolynomial = new ChromaticPolynomial();
+                String polynomial = chromaticPolynomial.calculateChromaticPolynomial(nodes);
+                JTextArea answer = new JTextArea();
+                answer.setText(polynomial);
+                answer.setWrapStyleWord(true);
+                answer.setLineWrap(true);
+                answer.setCaretPosition(0);
+                answer.setEditable(false);
+                JOptionPane.showMessageDialog(GraphCreationFrame.this, new JScrollPane(answer), "Chromatic Polynomial", JOptionPane.INFORMATION_MESSAGE);
+
+            }
+        });
+        this.add(calcChromaticPoly,BorderLayout.SOUTH);
     }
 
     private void setBufferedImageToColor(Color color) {
@@ -102,11 +123,6 @@ public class GraphCreationFrame extends JFrame {
         drawNodeBoundaries(g2d);
         drawNodes(g2d);
         drawEdges(g2d);
-        this.repaint();
-        ChromaticPolynomial chromaticPolynomial = new ChromaticPolynomial();
-        System.out.println("Testing out poly");
-        System.out.println(chromaticPolynomial.calculateChromaticPolynomial(nodes));
-
     }
 
     private void drawNodes(Graphics2D g2d) {
