@@ -1,0 +1,21 @@
+* To Run
+** Windows
+[[https://stackoverflow.com/questions/394616/running-jar-file-on-windows][See this tutorial on running jars!]]
+** Mac/Linux
+- Install java
+- Open a terminal
+- java -jar thejarfile.jar
+  
+* Directions
+Click on the white area to add a node.
+
+The node has a black boundary in which other nodes cannot be placed (to keep the red circles from overlapping.).
+
+To add a new edge, click on the red of a node center, and then drag to the red of another node center, and release.
+
+Once some nodes are added, click the calculate chromatic polynomial button to calculate a chromatic polynomial!
+
+(IF the button isn't visible, try scrolling/resizing.)
+
+* Source code
+[[https://github.com/MatthewBregg/ChromaticPolynomialTool][Source Code]]
