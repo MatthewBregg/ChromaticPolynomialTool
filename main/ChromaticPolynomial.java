@@ -48,6 +48,11 @@ public class ChromaticPolynomial {
     }
 
     private String calculateChromaticPolynomialHelper(boolean[][] graph) {
+        for (int i = 0; i != graph.length; ++i ) {
+                if ( graph[i][i] ) {
+                    System.err.println("Error, loop detected!");
+            }
+        }
         if ( !doesGraphHaveEdges(graph) ) {
             return "(x^"+graph.length + ")";
         }
@@ -65,7 +70,7 @@ public class ChromaticPolynomial {
             graphCopy = contractRandomEdge(graphCopy);
             contraction = calculateChromaticPolynomialHelper(graphCopy);
         }
-        return "("+deletion + ")-(" + contraction+")";
+        return "(("+deletion + ")-(" + contraction+"))";
     }
 
 
@@ -85,6 +90,10 @@ public class ChromaticPolynomial {
                     }
                 }
             }
+        }
+
+        if ( edgeBegin == -1 || edgeEnd == -1 ) {
+            throw new IllegalStateException("Error, Never found an edge!");
         }
 
         ArrayList<Node> newGraph = new ArrayList<>();

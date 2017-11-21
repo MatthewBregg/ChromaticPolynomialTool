@@ -100,7 +100,19 @@ public class GraphCreationFrame extends JFrame {
 
             }
         });
-        this.add(calcChromaticPoly,BorderLayout.SOUTH);
+        this.add(calcChromaticPoly,BorderLayout.EAST);
+        JButton calcSpanningTree = new JButton("Reduce The Grapth to a spanning tree!");
+        calcSpanningTree.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+               SpanningTree spanningTree = new SpanningTree();
+               spanningTree.mutateIntoSpanningTree(nodes);
+               setBufferedImageToColor(backgroundColor);
+               redrawImage();
+               repaint();
+            }
+        });
+        this.add(calcSpanningTree,BorderLayout.WEST);
     }
 
     private void setBufferedImageToColor(Color color) {
