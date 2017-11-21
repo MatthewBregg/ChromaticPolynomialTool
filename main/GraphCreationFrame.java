@@ -101,6 +101,7 @@ public class GraphCreationFrame extends JFrame {
         drawNodeBoundaries(g2d);
         drawNodes(g2d);
         drawEdges(g2d);
+        System.out.println(ChromaticPolynomial.calculateChromaticPolynomial(nodes));
 
     }
 
@@ -155,12 +156,4 @@ public class GraphCreationFrame extends JFrame {
         return (pointColor.equals(backgroundColor));
     }
 
-   private class Node {
-       public Node(Point position) {
-           this.position = position;
-       }
-
-       public final Point position;
-       public final ArrayList<Node> edgesTo = new ArrayList<>();
-   }
 }
