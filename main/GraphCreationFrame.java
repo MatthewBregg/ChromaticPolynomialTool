@@ -6,6 +6,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class GraphCreationFrame extends JFrame {
 
@@ -101,7 +102,10 @@ public class GraphCreationFrame extends JFrame {
         drawNodeBoundaries(g2d);
         drawNodes(g2d);
         drawEdges(g2d);
-        System.out.println(ChromaticPolynomial.calculateChromaticPolynomial(nodes));
+        this.repaint();
+        ChromaticPolynomial chromaticPolynomial = new ChromaticPolynomial();
+        System.out.println("Testing out poly");
+        System.out.println(chromaticPolynomial.calculateChromaticPolynomial(new HashSet<>(nodes)));
 
     }
 

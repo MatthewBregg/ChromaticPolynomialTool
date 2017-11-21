@@ -3,6 +3,8 @@ package main;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Node {
     public Node(Point position) {
@@ -10,5 +12,6 @@ public class Node {
     }
 
     public final Point position;
-    public final ArrayList<Node> edgesTo = new ArrayList<>();
+    public final Set<Node> edgesTo = new HashSet<>();
+
 }
