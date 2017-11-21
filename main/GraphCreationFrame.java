@@ -8,7 +8,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 public class GraphCreationFrame extends JFrame {
 
@@ -35,36 +34,60 @@ public class GraphCreationFrame extends JFrame {
         Point startingDrag = null;
         @Override
         public void mouseClicked(MouseEvent mouseEvent) {
-            if ( isPointOnBackground(mouseEvent.getPoint()) && isPointOutsideNode(mouseEvent.getPoint()) ) {
-                System.out.println("Adding a new node!");
-                createNewNodeAtPoint(mouseEvent.getPoint());
-                GraphCreationFrame.this.repaint();
-            } else {
-                System.out.println("Already was a node here!");
+            if ( mouseEvent.getButton() == MouseEvent.BUTTON1) {
+                if (isPointOnBackground(mouseEvent.getPoint()) && isPointOutsideNode(mouseEvent.getPoint())) {
+                    System.out.println("Adding a new node!");
+                    createNewNodeAtPoint(mouseEvent.getPoint());
+                    GraphCreationFrame.this.repaint();
+                } else {
+                    System.out.println("Already was a node here");
+                }
+            }
+            if ( mouseEvent.getButton() == MouseEvent.BUTTON3 ) {
+                System.out.println("Deleting node and all edges to it!");
+                Node toBeDeleted = getNodeThatContainsPoint(mouseEvent.getPoint());
+                // Remove all it's edges
+                for (Node node : nodes) {
+                    node.edgesTo.remove(toBeDeleted);
+                }
+                // Remove the node itself.
+                nodes.remove(toBeDeleted);
+                // Now reorder all ids!!!!
+                for ( int id = 0; id != nodes.size(); ++id ) {
+                    nodes.get(id).setID(id);
+                }
+                setBufferedImageToColor(backgroundColor);
+                redrawImage();
+                repaint();
             }
         }
 
         @Override
         public void mousePressed(MouseEvent mouseEvent) {
-            if ( isPointInsideNode(mouseEvent.getPoint())) {
-                startingDrag = mouseEvent.getPoint();
+            if ( mouseEvent.getButton() == MouseEvent.BUTTON1) {
+                if (isPointInsideNode(mouseEvent.getPoint())) {
+                    startingDrag = mouseEvent.getPoint();
+                }
             }
         }
 
         @Override
         public void mouseReleased(MouseEvent mouseEvent) {
-            if ( isPointInsideNode(mouseEvent.getPoint()) && startingDrag != null ) {
-                Node startingNode = getNodeThatContainsPoint(startingDrag);
-                Node endingNode = getNodeThatContainsPoint(mouseEvent.getPoint());
-                if ( endingNode == null || startingNode == null ) {
-                    throw new NullPointerException("Error, got a null node!");
+            if (mouseEvent.getButton() == MouseEvent.BUTTON1) {
+                if (isPointInsideNode(mouseEvent.getPoint()) && startingDrag != null) {
+                    Node startingNode = getNodeThatContainsPoint(startingDrag);
+                    Node endingNode = getNodeThatContainsPoint(mouseEvent.getPoint());
+                    if (endingNode == null || startingNode == null) {
+                        throw new NullPointerException("Error, got a null node!");
+                    }
+                    if (startingNode == endingNode) {
+                        JOptionPane.showMessageDialog(GraphCreationFrame.this, "Error, not allowing a edge to self currently.");
+                    } else {
+                        createNewEdgeBetweenNodes(startingNode, endingNode);
+                    }
+                    startingDrag = null;
+                    GraphCreationFrame.this.repaint();
                 }
-                if ( startingNode == endingNode ) {
-                    JOptionPane.showMessageDialog(GraphCreationFrame.this, "Error, not allowing a edge to self currently.");
-                }
-                createNewEdgeBetweenNodes(startingNode,endingNode);
-                startingDrag = null;
-                GraphCreationFrame.this.repaint();
             }
         }
 
@@ -175,12 +198,11 @@ public class GraphCreationFrame extends JFrame {
 
 
     private boolean isPointInsideNode(Point point) {
-        return !isPointOutsideNode(point);
+            return ( getNodeThatContainsPoint(point) != null);
     }
 
     private boolean isPointOutsideNode(Point point) {
-        Color pointColor = new Color(visualGraph.getRGB(point.x,point.y));
-        return (pointColor.equals(backgroundColor) || (pointColor.equals(nodeBounderyColor))) || pointColor.equals(edgeColor);
+        return ( getNodeThatContainsPoint(point) == null);
     }
 
     private boolean isPointOnBackground(Point point) {
