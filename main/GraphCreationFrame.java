@@ -30,8 +30,14 @@ public class GraphCreationFrame extends JFrame {
         return null;
     }
 
+    Point startingDrag = null;
+    private void colorDraggingNode(Color toColor) {
+        Node dragging = getNodeThatContainsPoint(startingDrag);
+        colorNode(dragging,toColor);
+        drawEdges(visualGraph.createGraphics());
+    }
+    Color specialNodeSelectedColor = Color.BLUE;
     private class GraphMouseyCreatey extends MouseAdapter {
-        Point startingDrag = null;
         @Override
         public void mouseClicked(MouseEvent mouseEvent) {
             if ( mouseEvent.getButton() == MouseEvent.BUTTON1) {
@@ -67,6 +73,8 @@ public class GraphCreationFrame extends JFrame {
             if ( mouseEvent.getButton() == MouseEvent.BUTTON1) {
                 if (isPointInsideNode(mouseEvent.getPoint())) {
                     startingDrag = mouseEvent.getPoint();
+                    colorDraggingNode(specialNodeSelectedColor);
+                    repaint();
                 }
             }
         }
@@ -85,6 +93,11 @@ public class GraphCreationFrame extends JFrame {
                     } else {
                         createNewEdgeBetweenNodes(startingNode, endingNode);
                     }
+                    colorDraggingNode(nodeColor);
+                    startingDrag = null;
+                    GraphCreationFrame.this.repaint();
+                } else if ( startingDrag != null ) {
+                    colorDraggingNode(nodeColor);
                     startingDrag = null;
                     GraphCreationFrame.this.repaint();
                 }
@@ -164,8 +177,20 @@ public class GraphCreationFrame extends JFrame {
         for ( Node n : nodes ) {
             Point point = n.position;
             g2d.setColor(nodeColor);
-            g2d.fillOval(point.x - nodeRadius, point.y - nodeRadius, nodeRadius * 2, nodeRadius * 2);
+            drawSingleNode(g2d,point);
         }
+    }
+
+    private void drawSingleNode(Graphics2D g2d, Point point) {
+        g2d.fillOval(point.x - nodeRadius, point.y - nodeRadius, nodeRadius * 2, nodeRadius * 2);
+    }
+
+    private void colorNode(Node n,Color localnodeColor) {
+        Graphics2D g2d = visualGraph.createGraphics();
+        Point point = n.position;
+        g2d.setColor(localnodeColor);
+        drawSingleNode(g2d,point);
+
     }
 
     // Note: Since I am always adding an edge to both startingNode.edgesTo and endingNode.edgesTo, we draw all edges twice.
