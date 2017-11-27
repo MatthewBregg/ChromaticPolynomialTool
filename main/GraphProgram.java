@@ -1,11 +1,9 @@
 package main;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class GraphProgram {
-    private static final int WIDTH = 1820;
-    private static final int HEIGHT = 980;
-
     // we'll see later this is an unsafe way to start a GUI based program,
     // and we'll cover how to do it properly.
 
@@ -19,7 +17,9 @@ public class GraphProgram {
     }
 
     public static void createAndShowGUI() {
-        JFrame frame = new GraphCreationFrame(WIDTH, HEIGHT);
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        // Improve later, atm it just makes a window smaller than the screen.
+        JFrame frame = new GraphCreationFrame(screenSize.width-200, screenSize.height-200);
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         frame.setVisible(true); // frame.show(); was depreciated as of java 1.5.
     }

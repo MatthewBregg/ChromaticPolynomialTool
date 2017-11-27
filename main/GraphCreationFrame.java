@@ -111,6 +111,9 @@ public class GraphCreationFrame extends JFrame {
         // setup the frame's attributes.
         this.setTitle("Fun with Graphs");
         this.setSize(width, height);
+        Rectangle actualSize = this.getBounds();
+        width = actualSize.width;
+        height = actualSize.height;
 
         this.setLayout(new BorderLayout());
 
