@@ -14,8 +14,11 @@ The node has a black boundary in which other nodes cannot be placed (to keep the
 To add a new edge, click on the red of a node center, and then drag to the red of another node center, and release.
 
 Once some nodes are added, click the calculate chromatic polynomial button to calculate a chromatic polynomial!
+Or, click on the Reduce  The Grapth to a spanning tree to get a spanning tree!
 
-(IF the button isn't visible, try scrolling/resizing.)
+ Right click on a node to remove it, and any edges to it.
+
+(IF the buttons aren't visible, try scrolling/resizing.)
 
 * Source code
 [[https://github.com/MatthewBregg/ChromaticPolynomialTool][Source Code]]
