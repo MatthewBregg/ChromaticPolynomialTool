@@ -1,6 +1,7 @@
 package main;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -105,6 +106,23 @@ public class GraphCreationFrame extends JFrame {
         }
 
     }
+    private int getValidPositiveNumber(String message) {
+        int number = 0;
+        while (true) {
+            try {
+                String result = JOptionPane.showInputDialog(message);
+                number = Integer.parseInt(result);
+                if (number <= 0) {
+                    throw new NumberFormatException("Number must be >= 0!");
+                }
+                break;
+            } catch (NumberFormatException e) {
+                message = "ERROR, Invalid number, try again. Enter a VALID positive number into the field.";
+                System.out.println("Failed to parse number, " + e);
+            }
+        }
+        return number;
+    }
 
     private final Color backgroundColor = Color.WHITE;
     public GraphCreationFrame(int width, int height) {
@@ -140,6 +158,19 @@ public class GraphCreationFrame extends JFrame {
             }
         });
         this.add(calcChromaticPoly,BorderLayout.EAST);
+        JButton changeNodeSize = new JButton("Change the size of the nodes.");
+        changeNodeSize.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                int newSize = getValidPositiveNumber("Enter a size for the nodes, default is 30.");
+                setBufferedImageToColor(backgroundColor);
+                nodeRadius = newSize;
+                redrawImage();
+                visualizedGraphLabel.repaint();
+            }
+        });
+        this.add(changeNodeSize, BorderLayout.CENTER);
         JButton calcSpanningTree = new JButton("Reduce The Grapth to a spanning tree!");
         calcSpanningTree.addActionListener(new ActionListener() {
             @Override
@@ -162,7 +193,7 @@ public class GraphCreationFrame extends JFrame {
 
     private static final Color nodeColor = Color.RED;
     private static final Color nodeBounderyColor = Color.BLACK;
-    private static final int nodeRadius = 30;
+    private static int nodeRadius = 30;
     private final ArrayList<Node> nodes = new ArrayList<>();
     private void createNewNodeAtPoint(Point point) {
         nodes.add(new Node(point,nodes.size()));
